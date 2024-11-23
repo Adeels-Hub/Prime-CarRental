@@ -42,17 +42,6 @@ namespace PrimeGroup.CarRentalService.Core.Services
 
         public async Task<BaseResult> ReserveVehicleAsync(DateTime pickupDate, DateTime returnDate, string vehicleType)
         {
-            // Ideally fluent validation should be used
-            if (pickupDate >= returnDate)
-            {
-                return new BaseResult
-                {
-                    IsSuccessful = false,
-                    ErrorMessage = "Pickup date must be earlier than the return date."
-                };
-            }
-
-            // Create a reservation object
             var reservation = new Reservation
             {
                 VehicleType = vehicleType,
@@ -60,14 +49,16 @@ namespace PrimeGroup.CarRentalService.Core.Services
                 ReturnDate = returnDate
             };
 
-            // Attempt to add the reservation
             var reservationResult = await _vehicleRepository.AddReservationAsync(reservation);
-
+            
             return new BaseResult
             {
                 IsSuccessful = reservationResult.IsSuccessful,
-                ErrorMessage = reservationResult.ErrorMessage
+                ErrorMessage = reservationResult.IsSuccessful
+                    ? null
+                    : $"Unable to reserve a '{vehicleType}' as all vehicles are currently booked."
             };
         }
+
     }
 }

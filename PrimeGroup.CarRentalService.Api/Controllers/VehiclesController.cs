@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using PrimeGroup.CarRentalService.Api.Helpers;
 using PrimeGroup.CarRentalService.Api.RequestDTOs;
 using PrimeGroup.CarRentalService.Core.Interfaces;
 
@@ -29,12 +30,7 @@ namespace PrimeGroup.CarRentalService.Api.Controllers
                 request.VehicleTypes
             );
 
-            if (!result.IsSuccessful)
-            {
-                return BadRequest(result.ErrorMessage);
-            }
-
-            return Ok(result.AvailableVehicles); // Sends the filtered vehicles to the client
+            return Ok(ResponseHelper.CreateResponse(result));
         }
 
 
@@ -49,15 +45,10 @@ namespace PrimeGroup.CarRentalService.Api.Controllers
             var result = await _vehicleService.ReserveVehicleAsync(
                 request.PickupDate,
                 request.ReturnDate,
-                request.VehicleType
+            request.VehicleType
             );
 
-            if (!result.IsSuccessful)
-            {
-                return BadRequest(result.ErrorMessage);
-            }
-
-            return Ok("Reservation successful.");
+            return Ok(ResponseHelper.CreateResponse(result));
         }
     }
 }
