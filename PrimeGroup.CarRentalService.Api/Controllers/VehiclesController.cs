@@ -18,6 +18,11 @@ namespace PrimeGroup.CarRentalService.Api.Controllers
         [HttpGet("availability")]
         public async Task<IActionResult> GetAvailability([FromQuery] VehicleAvailabilityRequest request)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             var result = await _vehicleService.CheckAvailabilityAsync(
                 request.PickupDate,
                 request.ReturnDate,
@@ -36,9 +41,9 @@ namespace PrimeGroup.CarRentalService.Api.Controllers
         [HttpPost("reserve")]
         public async Task<IActionResult> ReserveVehicle([FromBody] ReservationRequest request)
         {
-            if (request.PickupDate >= request.ReturnDate)
+            if (!ModelState.IsValid)
             {
-                return BadRequest("Pickup date must be earlier than the return date.");
+                return BadRequest(ModelState);
             }
 
             var result = await _vehicleService.ReserveVehicleAsync(
