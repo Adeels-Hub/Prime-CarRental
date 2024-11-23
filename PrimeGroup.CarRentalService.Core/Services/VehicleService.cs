@@ -32,7 +32,7 @@ namespace PrimeGroup.CarRentalService.Core.Services
                 ? availableVehicles
                 : availableVehicles.Where(v => vehicleTypes.Contains(v.Key))
                                    .ToDictionary(v => v.Key, v => v.Value);
-            
+
             return new VehicleAvailabilityResult
             {
                 IsSuccessful = true,
@@ -42,6 +42,7 @@ namespace PrimeGroup.CarRentalService.Core.Services
 
         public async Task<BaseResult> ReserveVehicleAsync(DateTime pickupDate, DateTime returnDate, string vehicleType)
         {
+            // Ideally fluent validation should be used
             if (pickupDate >= returnDate)
             {
                 return new BaseResult
@@ -51,18 +52,7 @@ namespace PrimeGroup.CarRentalService.Core.Services
                 };
             }
 
-            // Check available stock
-            var availableVehicles = await _vehicleRepository.GetAvailableVehiclesAsync();
-            if (!availableVehicles.TryGetValue(vehicleType, out var availableStock) || availableStock <= 0)
-            {
-                return new BaseResult
-                {
-                    IsSuccessful = false,
-                    ErrorMessage = $"No vehicles of type '{vehicleType}' are available."
-                };
-            }
-
-            // Create a reservation
+            // Create a reservation object
             var reservation = new Reservation
             {
                 VehicleType = vehicleType,
@@ -70,12 +60,13 @@ namespace PrimeGroup.CarRentalService.Core.Services
                 ReturnDate = returnDate
             };
 
-            // Try to add the reservation
-            var success = await _vehicleRepository.AddReservationAsync(reservation);
+            // Attempt to add the reservation
+            var reservationResult = await _vehicleRepository.AddReservationAsync(reservation);
+
             return new BaseResult
             {
-                IsSuccessful = success,
-                ErrorMessage = success ? null : "Failed to create reservation."
+                IsSuccessful = reservationResult.IsSuccessful,
+                ErrorMessage = reservationResult.ErrorMessage
             };
         }
     }
