@@ -13,17 +13,8 @@ namespace PrimeGroup.CarRentalService.Core.Services
             _vehicleRepository = vehicleRepository;
         }
 
-        public async Task<VehicleAvailabilityResult> CheckAvailabilityAsync(DateTime pickupDate, DateTime returnDate, string[]? vehicleTypes)
+        public async Task<ServiceResult<Dictionary<string, int>>> CheckAvailabilityAsync(DateTime pickupDate, DateTime returnDate, string[]? vehicleTypes)
         {
-            if (pickupDate >= returnDate)
-            {
-                return new VehicleAvailabilityResult
-                {
-                    IsSuccessful = false,
-                    ErrorMessage = "Pickup date must be earlier than the return date."
-                };
-            }
-
             // Fetch available vehicles
             var availableVehicles = await _vehicleRepository.GetAvailableVehiclesAsync();
 
@@ -33,14 +24,14 @@ namespace PrimeGroup.CarRentalService.Core.Services
                 : availableVehicles.Where(v => vehicleTypes.Contains(v.Key))
                                    .ToDictionary(v => v.Key, v => v.Value);
 
-            return new VehicleAvailabilityResult
+            return new ServiceResult<Dictionary<string, int>>
             {
                 IsSuccessful = true,
-                AvailableVehicles = filteredVehicles
+                Data = filteredVehicles
             };
         }
 
-        public async Task<BaseResult> ReserveVehicleAsync(DateTime pickupDate, DateTime returnDate, string vehicleType)
+        public async Task<ServiceResult<string>> ReserveVehicleAsync(DateTime pickupDate, DateTime returnDate, string vehicleType)
         {
             var reservation = new Reservation
             {
@@ -50,15 +41,15 @@ namespace PrimeGroup.CarRentalService.Core.Services
             };
 
             var reservationResult = await _vehicleRepository.AddReservationAsync(reservation);
-            
-            return new BaseResult
+
+            return new ServiceResult<string>
             {
                 IsSuccessful = reservationResult.IsSuccessful,
                 ErrorMessage = reservationResult.IsSuccessful
                     ? null
-                    : $"Unable to reserve a '{vehicleType}' as all vehicles are currently booked."
+                    : $"Unable to reserve a '{vehicleType}' as all vehicles are currently booked.",
+                Data = reservationResult.IsSuccessful ? "Reservation successful!" : null
             };
         }
-
     }
 }

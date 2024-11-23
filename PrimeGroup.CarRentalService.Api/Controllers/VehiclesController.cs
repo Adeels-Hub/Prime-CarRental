@@ -27,7 +27,7 @@ namespace PrimeGroup.CarRentalService.Api.Controllers
             var result = await _vehicleService.CheckAvailabilityAsync(
                 request.PickupDate,
                 request.ReturnDate,
-                request.VehicleTypes
+                request.GetVehicleTypesArray()
             );
 
             return Ok(ResponseHelper.CreateResponse(result));

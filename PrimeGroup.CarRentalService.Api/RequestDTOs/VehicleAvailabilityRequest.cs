@@ -15,7 +15,20 @@ namespace PrimeGroup.CarRentalService.Api.RequestDTOs
         [DataType(DataType.DateTime, ErrorMessage = "Return date must be a valid date and time.")]
         [CompareDates(nameof(PickupDate), ErrorMessage = "Return date must be later than the pickup date.")]
         public DateTime ReturnDate { get; set; }
-        
-        public string[]? VehicleTypes { get; set; }
+
+        /// <summary>
+        /// Comma-separated list of vehicle types.
+        /// </summary>
+        public string? VehicleTypes { get; set; }
+
+        /// <summary>
+        /// Converts the comma-separated vehicle types into an array.
+        /// </summary>
+        public string[]? GetVehicleTypesArray()
+        {
+            return string.IsNullOrEmpty(VehicleTypes)
+                ? null
+                : VehicleTypes.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+        }
     }
 }

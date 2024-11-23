@@ -4,14 +4,15 @@ namespace PrimeGroup.CarRentalService.Api.Helpers
 {
     public static class ResponseHelper
     {
-        public static object CreateResponse<T>(T result, string? defaultSuccessMessage = "Operation successful.", string? defaultFailureMessage = "Operation failed.")
-            where T : BaseResult
+        public static object CreateResponse<T>(ServiceResult<T> result, string? defaultSuccessMessage = "Operation successful.", string? defaultFailureMessage = "Operation failed.")
         {
             return new
             {
                 IsSuccessful = result.IsSuccessful,
-                Message = result.IsSuccessful ? defaultSuccessMessage : result.ErrorMessage ?? defaultSuccessMessage,                    
-                Data = result is VehicleAvailabilityResult availability ? availability.AvailableVehicles : null
+                Message = result.IsSuccessful
+                    ? (result.ErrorMessage ?? defaultSuccessMessage)
+                    : (result.ErrorMessage ?? defaultFailureMessage),
+                Data = result.Data
             };
         }
     }
