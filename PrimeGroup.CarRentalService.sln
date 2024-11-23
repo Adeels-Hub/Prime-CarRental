@@ -1,0 +1,59 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PrimeGroup.CarRentalService.Api", "PrimeGroup.CarRentalService.Api\PrimeGroup.CarRentalService.Api.csproj", "{BA5929BD-8F4C-4899-816C-99DD6EAF7CE2}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PrimeGroup.CarRentalService.Core", "PrimeGroup.CarRentalService.Core\PrimeGroup.CarRentalService.Core.csproj", "{936265BC-98FE-47D3-A4E4-7774E8C126EF}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PrimeGroup.CarRentalService.Data", "PrimeGroup.CarRentalService.Data\PrimeGroup.CarRentalService.Data.csproj", "{7BD9F916-6933-4F81-B380-2077AC005EBB}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PrimeGroup.CarRentalService.Api.Tests", "PrimeGroup.CarRentalService.Api.Tests\PrimeGroup.CarRentalService.Api.Tests.csproj", "{B06DF9DB-B9EB-43CB-85A7-CAF4394D2741}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PrimeGroup.CarRentalService.Core.Tests", "PrimeGroup.CarRentalService.Core.Tests\PrimeGroup.CarRentalService.Core.Tests.csproj", "{7512966D-8F1F-482F-864E-EC4EADC97EE7}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PrimeGroup.CarRentalService.Data.Tests", "PrimeGroup.CarRentalService.Data.Tests\PrimeGroup.CarRentalService.Data.Tests.csproj", "{D2FE40AF-5D0E-400B-8F9B-541D98E3E70C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{1A6E1F02-0B9A-431E-BF32-A0482AC09DC3}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BA5929BD-8F4C-4899-816C-99DD6EAF7CE2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BA5929BD-8F4C-4899-816C-99DD6EAF7CE2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BA5929BD-8F4C-4899-816C-99DD6EAF7CE2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BA5929BD-8F4C-4899-816C-99DD6EAF7CE2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{936265BC-98FE-47D3-A4E4-7774E8C126EF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{936265BC-98FE-47D3-A4E4-7774E8C126EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{936265BC-98FE-47D3-A4E4-7774E8C126EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{936265BC-98FE-47D3-A4E4-7774E8C126EF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7BD9F916-6933-4F81-B380-2077AC005EBB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7BD9F916-6933-4F81-B380-2077AC005EBB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7BD9F916-6933-4F81-B380-2077AC005EBB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7BD9F916-6933-4F81-B380-2077AC005EBB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B06DF9DB-B9EB-43CB-85A7-CAF4394D2741}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B06DF9DB-B9EB-43CB-85A7-CAF4394D2741}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B06DF9DB-B9EB-43CB-85A7-CAF4394D2741}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B06DF9DB-B9EB-43CB-85A7-CAF4394D2741}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7512966D-8F1F-482F-864E-EC4EADC97EE7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7512966D-8F1F-482F-864E-EC4EADC97EE7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7512966D-8F1F-482F-864E-EC4EADC97EE7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7512966D-8F1F-482F-864E-EC4EADC97EE7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D2FE40AF-5D0E-400B-8F9B-541D98E3E70C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D2FE40AF-5D0E-400B-8F9B-541D98E3E70C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D2FE40AF-5D0E-400B-8F9B-541D98E3E70C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D2FE40AF-5D0E-400B-8F9B-541D98E3E70C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{B06DF9DB-B9EB-43CB-85A7-CAF4394D2741} = {1A6E1F02-0B9A-431E-BF32-A0482AC09DC3}
+		{7512966D-8F1F-482F-864E-EC4EADC97EE7} = {1A6E1F02-0B9A-431E-BF32-A0482AC09DC3}
+		{D2FE40AF-5D0E-400B-8F9B-541D98E3E70C} = {1A6E1F02-0B9A-431E-BF32-A0482AC09DC3}
+	EndGlobalSection
+EndGlobal

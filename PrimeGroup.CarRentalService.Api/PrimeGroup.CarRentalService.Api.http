@@ -1,0 +1,6 @@
+@PrimeGroup.CarRentalService.Api_HostAddress = http://localhost:5294
+
+GET {{PrimeGroup.CarRentalService.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
