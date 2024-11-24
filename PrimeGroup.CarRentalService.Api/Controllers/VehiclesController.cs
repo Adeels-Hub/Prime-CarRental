@@ -19,6 +19,7 @@ namespace PrimeGroup.CarRentalService.Api.Controllers
         [HttpGet("availability")]
         public async Task<IActionResult> GetAvailability([FromQuery] VehicleAvailabilityRequest request)
         {
+            //ToDo: Use Fluent Validation instead of data annotation validation as the application requirements become more complex.
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
@@ -37,6 +38,7 @@ namespace PrimeGroup.CarRentalService.Api.Controllers
         [HttpPost("reserve")]
         public async Task<IActionResult> ReserveVehicle([FromBody] ReservationRequest request)
         {
+            //ToDo: Use Fluent Validation instead of data annotation validation as the application requirements become more complex.
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
