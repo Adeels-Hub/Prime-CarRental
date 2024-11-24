@@ -19,21 +19,46 @@ public class VehicleRepository : IVehicleRepository
         { "Van", 3 }
     };
 
-    // Available stock uses a thread-safe ConcurrentDictionary
+    // Available stock uses a thread-safe ConcurrentDictionary. Shallow copy of _totalStock is enough
+    // for protecting _totalStock from any unintending changes
     private static readonly ConcurrentDictionary<string, int> _availableStock = new(_totalStock);
 
     // Reservations stored in a thread-safe collection
     private static readonly ConcurrentBag<Reservation> _reservations = new();
 
     /// <summary>
-    /// Get the current available vehicles and their stock levels.
+    /// Get the available vehicles based on the provided dates and vehicle types.
     /// </summary>
-    /// <returns>A dictionary of vehicle types and their available stock.</returns>
-    public Task<Dictionary<string, int>> GetAvailableVehiclesAsync()
+    /// <param name="pickupDate">The pickup date for filtering.</param>
+    /// <param name="returnDate">The return date for filtering.</param>
+    /// <param name="vehicleTypes">Optional array of vehicle types to filter by.</param>
+    /// <returns>A dictionary of matching vehicle types and their available stock.</returns>
+    public async Task<Dictionary<string, int>> GetAvailableVehiclesAsync(DateTime pickupDate, DateTime returnDate, string[]? vehicleTypes)
     {
-        // Create a shallow copy of _availableStock to ensure calling code can't modify its values.
-        // A shallow copy is fine as key-value pairs are by default readonly.
-        return Task.FromResult(new Dictionary<string, int>(_availableStock));
+        //IMP: If multiple concurrent threads are calling GetAvailableVehiclesAsync as well as AddReservationAsync at 
+        // the same time then there is a chance that GetAvailableVehiclesAsync returns slightly outdated data but it will
+        // not crash and AddReservationAsync is implemented in such a way that user is only able to book a car if stock is 
+        // actually available, no matter 100 users are trying to book the last vehicle concurrently. Last car will only be
+        // reserved for only one person.
+        var availableStock = _availableStock
+            .Select(v => new
+            {
+                VehicleType = v.Key,
+                AvailableCount = v.Value - _reservations
+                    .Count(r => r.VehicleType == v.Key && r.PickupDate < returnDate && r.ReturnDate > pickupDate)
+            })
+            .Where(v => v.AvailableCount > 0) // Exclude vehicles with no stock
+            .ToDictionary(v => v.VehicleType, v => v.AvailableCount);
+
+        // Apply vehicle type filtering if specified
+        if (vehicleTypes != null && vehicleTypes.Length > 0)
+        {
+            availableStock = availableStock
+                .Where(v => vehicleTypes.Contains(v.Key))
+                .ToDictionary(v => v.Key, v => v.Value);
+        }
+
+        return await Task.FromResult(availableStock);
     }
 
     /// <summary>

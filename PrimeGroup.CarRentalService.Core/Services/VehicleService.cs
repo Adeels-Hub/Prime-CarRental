@@ -1,6 +1,9 @@
 ﻿using PrimeGroup.CarRentalService.Core.Entities;
 using PrimeGroup.CarRentalService.Core.Interfaces;
 using PrimeGroup.CarRentalService.Core.Results;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace PrimeGroup.CarRentalService.Core.Services
 {
@@ -15,24 +18,38 @@ namespace PrimeGroup.CarRentalService.Core.Services
 
         public async Task<ServiceResult<Dictionary<string, int>>> CheckAvailabilityAsync(DateTime pickupDate, DateTime returnDate, string[]? vehicleTypes)
         {
-            // Fetch available vehicles
-            var availableVehicles = await _vehicleRepository.GetAvailableVehiclesAsync();
+            if (pickupDate >= returnDate)
+            {
+                return new ServiceResult<Dictionary<string, int>>
+                {
+                    IsSuccessful = false,
+                    ErrorMessage = "Pickup date must be earlier than the return date.",
+                    Data = null
+                };
+            }
 
-            // Filter by vehicle types if provided
-            var filteredVehicles = vehicleTypes == null || vehicleTypes.Length == 0
-                ? availableVehicles
-                : availableVehicles.Where(v => vehicleTypes.Contains(v.Key))
-                                   .ToDictionary(v => v.Key, v => v.Value);
+            // Delegate the filtering to the repository
+            var availableVehicles = await _vehicleRepository.GetAvailableVehiclesAsync(pickupDate, returnDate, vehicleTypes);
 
             return new ServiceResult<Dictionary<string, int>>
             {
                 IsSuccessful = true,
-                Data = filteredVehicles
+                Data = availableVehicles
             };
         }
 
         public async Task<ServiceResult<string>> ReserveVehicleAsync(DateTime pickupDate, DateTime returnDate, string vehicleType)
         {
+            if (pickupDate >= returnDate)
+            {
+                return new ServiceResult<string>
+                {
+                    IsSuccessful = false,
+                    ErrorMessage = "Pickup date must be earlier than the return date.",
+                    Data = null
+                };
+            }
+
             var reservation = new Reservation
             {
                 VehicleType = vehicleType,
@@ -45,9 +62,7 @@ namespace PrimeGroup.CarRentalService.Core.Services
             return new ServiceResult<string>
             {
                 IsSuccessful = reservationResult.IsSuccessful,
-                ErrorMessage = reservationResult.IsSuccessful
-                    ? null
-                    : $"Unable to reserve a '{vehicleType}' as all vehicles are currently booked.",
+                ErrorMessage = reservationResult.ErrorMessage,
                 Data = reservationResult.IsSuccessful ? "Reservation successful!" : null
             };
         }
