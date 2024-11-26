@@ -24,29 +24,27 @@ namespace PrimeGroup.CarRentalService.Data.Tests
         [Fact]
         public async Task ConcurrentAccess_ShouldAllowOnlyOneReservation_ForLastVehicle()
         {
-            // Arrange: Set up reservation dates and vehicle type
+            // Arrange
             var pickupDate = DateTime.Now.AddDays(1);
             var returnDate = DateTime.Now.AddDays(3);
             var vehicleType = "Compact";
 
-            // Pass the specific vehicleType in the last parameter
+            // Fetch available vehicles and confirm stock
             var vehicleTypes = new[] { vehicleType };
-            var initialStock = (await _vehicleRepository.GetAvailableVehiclesAsync(pickupDate, returnDate, vehicleTypes))[vehicleType];
-            Assert.True(initialStock > 0, "Initial stock should be greater than 0 for this test.");
+            var availableVehicles = await _vehicleRepository.GetAvailableVehiclesAsync(pickupDate, returnDate, vehicleTypes);
+            var initialStock = availableVehicles.FirstOrDefault(v => v.Type == vehicleType)?.AvailableStock ?? 0;
 
-            // Number of threads simulating concurrent users
+            Assert.True(initialStock > 0, $"No vehicles of type '{vehicleType}' are available for testing.");
+
+            // Simulate concurrent reservations
             var numberOfUsers = 100;
-
-            // List to track reservation results
             var reservationResults = new ConcurrentBag<bool>();
             var tasks = new List<Task>();
 
-            // Act: Run multiple threads calling GetAvailableVehiclesAsync and AddReservationAsync concurrently
             for (int i = 0; i < numberOfUsers; i++)
             {
                 tasks.Add(Task.Run(async () =>
                 {
-                    // Attempt to reserve the vehicle
                     var reservation = new Reservation
                     {
                         VehicleType = vehicleType,
@@ -58,18 +56,17 @@ namespace PrimeGroup.CarRentalService.Data.Tests
                 }));
             }
 
-            // Wait for all tasks to complete
+            // Act
             await Task.WhenAll(tasks);
 
-            // Assert: Check the results
+            // Assert
             var successfulReservations = reservationResults.Count(r => r);
-            var finalStock = (await _vehicleRepository.GetAvailableVehiclesAsync(pickupDate, returnDate, vehicleTypes))[vehicleType];
+            var finalAvailableVehicles = await _vehicleRepository.GetAvailableVehiclesAsync(pickupDate, returnDate, vehicleTypes);
+            var finalStock = finalAvailableVehicles.FirstOrDefault(v => v.Type == vehicleType)?.AvailableStock ?? 0;
 
-            // Ensure only one car was reserved for each available stock unit
             Assert.Equal(initialStock, successfulReservations);
-            Assert.Equal(0, finalStock); // Final stock should be zero
+            Assert.Equal(0, finalStock);
         }
-
 
     }
 }

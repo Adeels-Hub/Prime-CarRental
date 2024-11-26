@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace PrimeGroup.CarRentalService.Core.Interfaces
+﻿namespace PrimeGroup.CarRentalService.Core.Results
 {
+    //ToDo: Depending on how project grows we will change name of this class to RepositoryResult
     /// <summary>
     /// Result class for adding a reservation, containing success status and an optional error message.
     /// </summary>

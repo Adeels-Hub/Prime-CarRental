@@ -16,6 +16,6 @@ namespace PrimeGroup.CarRentalService.Api.RequestDTOs
         [CompareDates(nameof(PickupDate), ErrorMessage = "Return date must be later than the pickup date.")]
         public DateTime ReturnDate { get; set; } //ToDo: DateTimeOffSet is a better choice to cater for multiple time zones in Australia
 
-        public string? VehicleType { get; set; }
+        public required string VehicleType { get; set; }
     }
 }

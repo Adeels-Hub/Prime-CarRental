@@ -1,7 +1,5 @@
-﻿using PrimeGroup.CarRentalService.Core.Results;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using PrimeGroup.CarRentalService.Core.Entities;
+using PrimeGroup.CarRentalService.Core.Results;
 
 namespace PrimeGroup.CarRentalService.Core.Interfaces
 {
@@ -16,8 +14,8 @@ namespace PrimeGroup.CarRentalService.Core.Interfaces
         /// <param name="pickupDate">The pickup date for availability checking.</param>
         /// <param name="returnDate">The return date for availability checking.</param>
         /// <param name="vehicleTypes">Optional array of vehicle types to filter by.</param>
-        /// <returns>A ServiceResult containing a dictionary of available vehicle types and their quantities.</returns>
-        Task<ServiceResult<Dictionary<string, int>>> CheckAvailabilityAsync(DateTime pickupDate, DateTime returnDate, string[]? vehicleTypes);
+        /// <returns>A ServiceResult containing a list of available vehicles.</returns>
+        Task<ServiceResult<List<Vehicle>>> CheckAvailabilityAsync(DateTime pickupDate, DateTime returnDate, string[]? vehicleTypes);
 
         /// <summary>
         /// Reserves a vehicle of the specified type for the given date range.

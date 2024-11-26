@@ -1,9 +1,6 @@
 ﻿using PrimeGroup.CarRentalService.Core.Entities;
 using PrimeGroup.CarRentalService.Core.Interfaces;
 using PrimeGroup.CarRentalService.Core.Results;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace PrimeGroup.CarRentalService.Core.Services
 {
@@ -16,22 +13,12 @@ namespace PrimeGroup.CarRentalService.Core.Services
             _vehicleRepository = vehicleRepository;
         }
 
-        public async Task<ServiceResult<Dictionary<string, int>>> CheckAvailabilityAsync(DateTime pickupDate, DateTime returnDate, string[]? vehicleTypes)
+        public async Task<ServiceResult<List<Vehicle>>> CheckAvailabilityAsync(DateTime pickupDate, DateTime returnDate, string[]? vehicleTypes)
         {
-            if (pickupDate >= returnDate)
-            {
-                return new ServiceResult<Dictionary<string, int>>
-                {
-                    IsSuccessful = false,
-                    ErrorMessage = "Pickup date must be earlier than the return date.",
-                    Data = null
-                };
-            }
-
             // Delegate the filtering to the repository
             var availableVehicles = await _vehicleRepository.GetAvailableVehiclesAsync(pickupDate, returnDate, vehicleTypes);
 
-            return new ServiceResult<Dictionary<string, int>>
+            return new ServiceResult<List<Vehicle>>
             {
                 IsSuccessful = true,
                 Data = availableVehicles
@@ -40,16 +27,6 @@ namespace PrimeGroup.CarRentalService.Core.Services
 
         public async Task<ServiceResult<string>> ReserveVehicleAsync(DateTime pickupDate, DateTime returnDate, string vehicleType)
         {
-            if (pickupDate >= returnDate)
-            {
-                return new ServiceResult<string>
-                {
-                    IsSuccessful = false,
-                    ErrorMessage = "Pickup date must be earlier than the return date.",
-                    Data = null
-                };
-            }
-
             var reservation = new Reservation
             {
                 VehicleType = vehicleType,

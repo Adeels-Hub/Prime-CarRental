@@ -1,5 +1,6 @@
 ﻿using PrimeGroup.CarRentalService.Core.Entities;
 using PrimeGroup.CarRentalService.Core.Interfaces;
+using PrimeGroup.CarRentalService.Core.Results;
 using System.Collections.Concurrent;
 
 namespace PrimeGroup.CarRentalService.Data
@@ -11,57 +12,52 @@ namespace PrimeGroup.CarRentalService.Data
     /// </summary>
     public class VehicleRepository : IVehicleRepository
     {
-        // _totalStock is static and only accessed at startup to populate _availableStock, which is also static.
-        // If requirements change and _totalStock needs modification after application start, its type should be reviewed.
-        //ToDo:Use PrimeGroup.CarRentalService.Core.Entities.Vehicle for storing vehicle data
-        private static readonly Dictionary<string, int> _totalStock = new()
-    {
-        { "Compact", 10 },
-        { "Sedan", 8 },
-        { "SUV", 5 },
-        { "Van", 3 }
-    };
-
-        // Available stock uses a thread-safe ConcurrentDictionary. Shallow copy of _totalStock is enough
-        // for protecting _totalStock from any unintending changes
-        private static readonly ConcurrentDictionary<string, int> _availableStock = new(_totalStock);
+        // Static list of vehicles representing the total stock (only initialized at startup)
+        private static readonly ConcurrentDictionary<string, Vehicle> _vehicles = new()
+        {
+            ["Compact"] = new Vehicle { Type = "Compact", TotalStock = 10, AvailableStock = 10 },
+            ["Sedan"] = new Vehicle { Type = "Sedan", TotalStock = 8, AvailableStock = 8 },
+            ["SUV"] = new Vehicle { Type = "SUV", TotalStock = 5, AvailableStock = 5 },
+            ["Van"] = new Vehicle { Type = "Van", TotalStock = 3, AvailableStock = 3 }
+        };
 
         // Reservations stored in a thread-safe collection
         private static readonly ConcurrentBag<Reservation> _reservations = new();
 
+        private static readonly SemaphoreSlim _reservationSemaphore = new(1, 1);
+
         /// <summary>
         /// Get the available vehicles based on the provided dates and vehicle types.
         /// </summary>
-        /// <param name="pickupDate">The pickup date for filtering.</param>
-        /// <param name="returnDate">The return date for filtering.</param>
-        /// <param name="vehicleTypes">Optional array of vehicle types to filter by.</param>
-        /// <returns>A dictionary of matching vehicle types and their available stock.</returns>
-        public async Task<Dictionary<string, int>> GetAvailableVehiclesAsync(DateTime pickupDate, DateTime returnDate, string[]? vehicleTypes)
+        public async Task<List<Vehicle>> GetAvailableVehiclesAsync(DateTime pickupDate, DateTime returnDate, string[]? vehicleTypes)
         {
             //IMP: If multiple concurrent threads are calling GetAvailableVehiclesAsync as well as AddReservationAsync at 
             // the same time then there is a chance that GetAvailableVehiclesAsync returns slightly outdated data but it will
             // not crash and AddReservationAsync is implemented in such a way that user is only able to book a car if stock is 
             // actually available, no matter 100 users are trying to book the last vehicle concurrently. Last car will only be
-            // reserved for only one person.            
-            
-            var filteredStock = (vehicleTypes != null && vehicleTypes.Length > 0) // Apply vehicle type filtering if specified
-                ? _availableStock.Where(v => vehicleTypes.Contains(v.Key))
-                                 .ToDictionary(v => v.Key, v => v.Value)
-                : _availableStock.ToDictionary(v => v.Key, v => v.Value);
+            // reserved for only one person. I preferred performance over slight temporary inconsistency in data by avodiing
+            // too many calls to SemaphoreSlim
 
-            return await Task.FromResult(filteredStock);            
+            // Filter vehicles based on the provided types
+            var filteredVehicles = (vehicleTypes != null && vehicleTypes.Length > 0)
+                ? _vehicles.Values.Where(v => vehicleTypes.Contains(v.Type))
+                : _vehicles.Values;
+
+            // Return the filtered list without adjusting availability directly
+            return await Task.FromResult(filteredVehicles.ToList());
         }
 
-        private static readonly SemaphoreSlim _reservationSemaphore = new(1, 1);
-
+        /// <summary>
+        /// Add a reservation for a vehicle, ensuring thread-safe stock updates.
+        /// </summary>
         public async Task<ReservationResult> AddReservationAsync(Reservation reservation)
         {
             // Wait for access to the critical section
             await _reservationSemaphore.WaitAsync();
             try
             {
-                // Check if the vehicle type exists and is available
-                if (!_availableStock.TryGetValue(reservation.VehicleType, out var stock) || stock <= 0)
+                // Ensure the vehicle exists and has available stock
+                if (!_vehicles.TryGetValue(reservation.VehicleType, out var vehicle) || vehicle.AvailableStock <= 0)
                 {
                     return new ReservationResult
                     {
@@ -70,35 +66,21 @@ namespace PrimeGroup.CarRentalService.Data
                     };
                 }
 
-                // Deduct from available stock atomically
-                var updatedStock = _availableStock.AddOrUpdate(
-                    reservation.VehicleType,
-                    0,
-                    (key, currentStock) => currentStock > 0 ? currentStock - 1 : currentStock);
+                // Deduct available stock
+                vehicle.AvailableStock--;
 
-                // Ensure stock was successfully updated
-                if (updatedStock < stock)
-                {
-                    _reservations.Add(reservation);
-                    return new ReservationResult
-                    {
-                        IsSuccessful = true
-                    };
-                }
+                // Add the reservation
+                _reservations.Add(reservation);
 
                 return new ReservationResult
                 {
-                    IsSuccessful = false,
-                    ErrorMessage = $"Vehicle of type '{reservation.VehicleType}' was just reserved by another user."
+                    IsSuccessful = true
                 };
             }
             finally
             {
-                // Release the semaphore
                 _reservationSemaphore.Release();
             }
         }
-
-
     }
 }
